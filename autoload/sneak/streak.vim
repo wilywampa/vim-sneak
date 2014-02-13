@@ -33,7 +33,7 @@ let g:sneak#target_labels = get(g:, 'sneak#target_labels', "asdfghjkl;qwertyuiop
 
 func! s:placematch(c, pos)
   let s:matchmap[a:c] = a:pos
-  exec "syntax match SneakStreakTarget '\\%".a:pos[0]."l\\%".a:pos[1]."c.' conceal cchar=".a:c
+  exec "syntax match SneakStreakTarget '\\%".a:pos[0]."l\\%".a:pos[1]."c.' contains=NONE containedin=.* conceal cchar=".a:c
 endf
 
 func! s:decorate_statusline() "highlight statusline to indicate streak-mode.
@@ -126,6 +126,7 @@ func! s:after()
   let &concealcursor=s:cc_orig
   let &conceallevel=s:cl_orig
   call s:restore_conceal_in_other_windows()
+  let &l:iskeyword=s:kw_orig
 endf
 
 func! s:disable_conceal_in_other_windows()
@@ -155,9 +156,10 @@ func! s:before()
 
   let s:cc_orig=&l:concealcursor | setlocal concealcursor=ncv
   let s:cl_orig=&l:conceallevel  | setlocal conceallevel=2
+  let s:kw_orig=&l:iskeyword     | setlocal iskeyword=
 
   let s:syntax_orig=&syntax
-  syntax clear
+  " syntax clear
   " this is fast since we cleared syntax, and it allows sneak to work on very long wrapped lines.
   let s:synmaxcol_orig=&synmaxcol | set synmaxcol=0
 
