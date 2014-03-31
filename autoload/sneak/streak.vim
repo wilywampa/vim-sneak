@@ -86,21 +86,25 @@ func! s:do_streak(s, v, reverse) "{{{
 
   call winrestview(w) | redraw
   let choice = sneak#util#getchar()
-  call s:after()
 
   let mappedto = maparg(choice, a:v ? 'x' : 'n')
   let mappedtoNext = mappedto =~# '<Plug>SneakNext'
+  call s:after()
 
   if choice == "\<Tab>" && overflow[0] > 0 "overflow => decorate next N matches
     call cursor(overflow[0], overflow[1])
   elseif -1 != index(["\<Esc>", "\<C-c>", "\<Space>", "\<CR>"], choice)
-    return "\<Esc>" "exit streak-mode.
-  elseif !mappedtoNext && !has_key(s:matchmap, choice) "press _any_ invalid key to escape.
-    call feedkeys(choice) "exit streak-mode and fall through to Vim.
-    return ""
-  else "valid target was selected
-    let p = mappedtoNext ? s:matchmap[strpart(g:sneak#target_labels, 0, 1)] : s:matchmap[choice]
-    call cursor(p[0], p[1])
+    let choice "\<Esc>" "exit streak-mode.
+  elseif mappedto =~# '<Plug>Sneak\(_s\|Forward\)' "activate the targets
+    let choice = sneak#util#getchar()
+    redraw | echo "target> " | redraw
+    if has_key(s:matchmap, choice) "valid target was selected
+      let p = mappedtoNext ? s:matchmap[strpart(g:sneak#target_labels, 0, 1)] : s:matchmap[choice]
+      call cursor(p[0], p[1])
+    endif
+  else "any other key falls through to Vim.
+    call feedkeys(choice)
+    let choice = ""
   endif
 
   return choice
