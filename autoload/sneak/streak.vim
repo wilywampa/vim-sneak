@@ -149,7 +149,7 @@ func! s:before()
   let s:matchmap = {}
 
   " prevent highlighting in other windows showing the same buffer
-  ownsyntax sneak_streak
+  " ownsyntax sneak_streak
 
   " highlight the cursor location (else the cursor is not visible during getchar())
   let w:sneak_cursor_hl = matchadd("SneakStreakCursor", '\%#', 11, -1)
@@ -159,7 +159,6 @@ func! s:before()
   let s:kw_orig=&l:iskeyword     | setlocal iskeyword=
 
   let s:syntax_orig=&syntax
-  " syntax clear
   " this is fast since we cleared syntax, and it allows sneak to work on very long wrapped lines.
   let s:synmaxcol_orig=&synmaxcol | set synmaxcol=0
 
