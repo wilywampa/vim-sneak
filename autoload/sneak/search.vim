@@ -6,14 +6,18 @@ func! sneak#search#new()
   func! s.init(input, repeatmotion, reverse)
     let self._reverse = a:reverse
     " search pattern modifiers (case-sensitivity, magic)
-    let self.prefix = sneak#search#get_cs(a:input, g:sneak#opt.use_ic_scs).'\V'
+    if len(a:input) == 1
+      let self.prefix = '\C\V'
+    else
+      let self.prefix = sneak#search#get_cs(a:input, g:sneak#opt.use_ic_scs).'\V'
+    endif
     " the escaped user input to search for
     let self.search = escape(a:input, '"\')
     " example: highlight string 'ab' after line 42, column 5 
     "          matchadd('foo', 'ab\%>42l\%5c', 1)
     let self.match_pattern = ''
-    " do not wrap                     search backwards
-    let self._search_options = 'W' . (a:reverse ? 'b' : '')
+    " do wrap                        search backwards
+    let self._search_options = 'w' . (a:reverse ? 'b' : '')
     let self.search_options_no_s = self._search_options
     " save the jump on the initial invocation, _not_ repeats.
     if !a:repeatmotion | let self._search_options .= 's' | endif
