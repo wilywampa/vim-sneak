@@ -117,6 +117,10 @@ func! s:after()
   let &concealcursor=s:cc_orig
   let &conceallevel=s:cl_orig
   call s:restore_conceal_in_other_windows()
+  if s:resetAnsiEsc
+    AnsiEsc
+    AnsiEsc
+  endif
 endf
 
 func! s:disable_conceal_in_other_windows()
@@ -138,6 +142,15 @@ endf
 func! s:before()
   let s:matchmap = {}
 
+  " Check if AnsiEsc is enabled
+  redir => ansiCheck
+  try
+    syntax list ansiConceal
+  catch /^Vim\%((\a\+)\)\=:E28/
+  endtry
+  redir END
+  let s:resetAnsiEsc = match(ansiCheck, 'ansi') != -1
+  
   " prevent highlighting in other windows showing the same buffer
   ownsyntax sneak_streak
 
