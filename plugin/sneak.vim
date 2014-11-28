@@ -63,6 +63,7 @@ func! sneak#wrap(op, inputlen, reverse, inclusive, streak) abort
   else " s invokes new search
     call sneak#to(a:op, s:getnchars(a:inputlen, a:op), a:inputlen, cnt, 0, a:reverse, a:inclusive, a:streak)
   endif
+  normal! zv
 endf
 
 "repeat *motion* (not operation)
@@ -74,6 +75,7 @@ func! sneak#rpt(op, reverse) abort
 
   call sneak#to(a:op, s:st.input, s:st.inputlen, v:count1, 1,
         \ ((a:reverse && !s:st.reverse) || (!a:reverse && s:st.reverse)), s:st.inclusive, 0)
+  normal! zv
 endf
 
 " input:      may be shorter than inputlen if the user pressed <enter> at the prompt.
