@@ -48,9 +48,6 @@ endf
 func! sneak#cancel()
   call sneak#hl#removehl()
   autocmd! SneakPlugin * <buffer>
-  if maparg('<esc>', 'n') =~# 'sneak#cancel' "teardown temporary <esc> mapping
-    silent! unmap <esc>
-  endif
   return ''
 endf
 
@@ -194,11 +191,6 @@ func! sneak#to(op, input, inputlen, count, repeatmotion, reverse, inclusive, str
   "  - store in w: because matchadd() highlight is per-window.
   let w:sneak_hl_id = matchadd('SneakPluginTarget',
         \ (s.prefix).(s.match_pattern).(s.search).'\|'.curln_pattern.(s.search))
-
-  "let user deactivate with <esc>
-  "  - use <expr> map to avoid remapping of e.g. ':', but return <esc>, which
-  "    needs to get remapped (for e.g. `<Home>`).
-  if maparg('<esc>', 'n') ==# ""|nmap <expr> <silent> <esc> sneak#cancel() . "\<esc>"|endif
 
   "enter streak-mode iff there are >=2 _additional_ on-screen matches.
   let target = (2 == a:streak || (a:streak && g:sneak#opt.streak)) && !max(bounds) && s.hasmatches(2)
