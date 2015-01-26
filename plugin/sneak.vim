@@ -23,6 +23,7 @@ func! sneak#init()
       \ ,'textobject_z' : get(g:, 'sneak#textobject_z', 1)
       \ ,'use_ic_scs'   : get(g:, 'sneak#use_ic_scs', 0)
       \ ,'map_netrw'    : get(g:, 'sneak#map_netrw', 1)
+      \ ,'map_esc'      : get(g:, 'sneak#map_esc', 0)
       \ ,'streak'       : get(g:, 'sneak#streak', 0) && (v:version >= 703) && has("conceal")
       \ ,'prompt'       : get(g:, 'sneak#prompt', '>')
       \ }
@@ -191,6 +192,10 @@ func! sneak#to(op, input, inputlen, count, repeatmotion, reverse, inclusive, str
   "  - store in w: because matchadd() highlight is per-window.
   let w:sneak_hl_id = matchadd('SneakPluginTarget',
         \ (s.prefix).(s.match_pattern).(s.search).'\|'.curln_pattern.(s.search))
+
+  if g:sneak#opt.map_esc && maparg('<esc>', 'n') ==# ""
+    nmap <expr> <silent> <esc> sneak#cancel() . "\<esc>"
+  endif
 
   "enter streak-mode iff there are >=2 _additional_ on-screen matches.
   let target = (2 == a:streak || (a:streak && g:sneak#opt.streak)) && !max(bounds) && s.hasmatches(2)
@@ -369,7 +374,9 @@ if g:sneak#opt.map_netrw && -1 != stridx(maparg("s", "n"), "Sneak")
   func! s:map_netrw_key(key)
     let expanded_map = maparg(a:key,'n')
     if !strlen(expanded_map) || expanded_map =~# '_Net\|FileBeagle'
-      exec (expanded_map =~# '<Plug>' ? 'nmap' : 'nnoremap').' <buffer> <silent> <leader>'.a:key.' '.expanded_map
+      if strlen(expanded_map) > 0 "else, mapped to <nop>
+        silent exe (expanded_map =~# '<Plug>' ? 'nmap' : 'nnoremap').' <buffer> <silent> <leader>'.a:key.' '.expanded_map
+      endif
       "unmap the default buffer-local mapping to allow Sneak's global mapping.
       silent! exe 'nunmap <buffer> '.a:key
     endif
