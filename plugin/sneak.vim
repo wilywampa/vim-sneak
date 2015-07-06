@@ -20,6 +20,7 @@ func! sneak#init()
   let g:sneak#opt = { 'f_reset' : get(g:, 'sneak#nextprev_f', get(g:, 'sneak#f_reset', 1))
       \ ,'t_reset'      : get(g:, 'sneak#nextprev_t', get(g:, 'sneak#t_reset', 1))
       \ ,'s_next'       : get(g:, 'sneak#s_next', 0)
+      \ ,'absolute_dir' : get(g:, 'sneak#absolute_dir', 0)
       \ ,'textobject_z' : get(g:, 'sneak#textobject_z', 1)
       \ ,'use_ic_scs'   : get(g:, 'sneak#use_ic_scs', 0)
       \ ,'map_netrw'    : get(g:, 'sneak#map_netrw', 1)
@@ -73,8 +74,9 @@ func! sneak#rpt(op, reverse) abort
     return
   endif
 
+  let l:relative_reverse = (a:reverse && !s:st.reverse) || (!a:reverse && s:st.reverse)
   call sneak#to(a:op, s:st.input, s:st.inputlen, v:count1, 1,
-        \ ((a:reverse && !s:st.reverse) || (!a:reverse && s:st.reverse)), s:st.inclusive, 0)
+        \ (g:sneak#opt.absolute_dir ? a:reverse : l:relative_reverse), s:st.inclusive, 0)
   normal! zv
 endf
 
