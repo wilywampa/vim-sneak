@@ -61,6 +61,8 @@ func! sneak#wrap(op, inputlen, reverse, inclusive, streak) abort
 
   if g:sneak#opt.s_next && is_similar_invocation && (sneak#util#isvisualop(a:op) || empty(a:op)) && sneak#is_sneaking()
     call sneak#rpt(a:op, a:reverse) " s goes to next match
+  elseif is_similar_invocation && a:op ==# 'g@' && !get(g:, 'first_op', 1) && get(g:, 'repeat_op', '') ==# &opfunc
+    call sneak#rpt(a:op, 0) " repeat same motion with same direction
   else " s invokes new search
     call sneak#to(a:op, s:getnchars(a:inputlen, a:op), a:inputlen, cnt, 0, a:reverse, a:inclusive, a:streak)
   endif
