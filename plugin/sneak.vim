@@ -13,6 +13,7 @@ set cpo&vim
 
 "persist state for repeat
 let s:st = { 'rst':1, 'input':'', 'inputlen':0, 'reverse':0, 'bounds':[0,0], 'inclusive':0 }
+let s:st_opfunc = deepcopy(s:st)
 
 func! sneak#init()
   unlockvar g:sneak#opt
@@ -61,8 +62,8 @@ func! sneak#wrap(op, inputlen, reverse, inclusive, streak) abort
 
   if g:sneak#opt.s_next && is_similar_invocation && (sneak#util#isvisualop(a:op) || empty(a:op)) && sneak#is_sneaking()
     call sneak#rpt(a:op, a:reverse) " s goes to next match
-  elseif is_similar_invocation && a:op ==# 'g@' && !get(g:, 'first_op', 1) && get(g:, 'repeat_op', '') ==# &opfunc
-    call sneak#rpt(a:op, 0) " repeat same motion with same direction
+  elseif a:op ==# 'g@' && !get(g:, 'first_op', 1) && get(g:, 'repeat_op', '') ==# &opfunc
+    call sneak#to(a:op, s:st_opfunc.input, s:st_opfunc.inputlen, cnt, 1, s:st_opfunc.reverse, s:st_opfunc.inclusive, 0)
   else " s invokes new search
     call sneak#to(a:op, s:getnchars(a:inputlen, a:op), a:inputlen, cnt, 0, a:reverse, a:inclusive, a:streak)
   endif
@@ -141,6 +142,9 @@ func! sneak#to(op, input, inputlen, count, repeatmotion, reverse, inclusive, str
 
     "set temporary hooks on f/F/t/T so that we know when to reset Sneak.
     call s:ft_hook()
+  endif
+  if a:op ==# 'g@' && get(g:, 'first_op', 0) && get(g:, 'repeat_op', '') ==# &opfunc
+    let s:st_opfunc = deepcopy(s:st)
   endif
 
   if is_op && 2 != a:inclusive && !a:reverse
