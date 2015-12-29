@@ -15,6 +15,16 @@ set cpo&vim
 let s:st = { 'rst':1, 'input':'', 'inputlen':0, 'reverse':0, 'bounds':[0,0], 'inclusive':0 }
 let s:st_opfunc = deepcopy(s:st)
 
+let s:check_opfunc = v:version > 704 || (v:version == 704 && has('patch786'))
+if s:check_opfunc
+  let s:opfunc = ''
+  let s:opfunc_new = 0
+  augroup SneakPluginOpfunc
+    autocmd!
+    autocmd OptionSet operatorfunc let s:opfunc = v:option_new | let s:opfunc_new = 1
+  augroup END
+endif
+
 func! sneak#init()
   unlockvar g:sneak#opt
   "options                                 v-- for backwards-compatibility
@@ -62,7 +72,7 @@ func! sneak#wrap(op, inputlen, reverse, inclusive, streak) abort
 
   if g:sneak#opt.s_next && is_similar_invocation && (sneak#util#isvisualop(a:op) || empty(a:op)) && sneak#is_sneaking()
     call sneak#rpt(a:op, a:reverse) " s goes to next match
-  elseif a:op ==# 'g@' && !get(g:, 'first_op', 1) && get(g:, 'repeat_op', '') ==# &opfunc
+  elseif s:check_opfunc && a:op ==# 'g@' && !s:opfunc_new && s:opfunc ==# &opfunc
     call sneak#to(a:op, s:st_opfunc.input, s:st_opfunc.inputlen, cnt, 1, s:st_opfunc.reverse, s:st_opfunc.inclusive, 0)
   else " s invokes new search
     call sneak#to(a:op, s:getnchars(a:inputlen, a:op), a:inputlen, cnt, 0, a:reverse, a:inclusive, a:streak)
@@ -143,7 +153,8 @@ func! sneak#to(op, input, inputlen, count, repeatmotion, reverse, inclusive, str
     "set temporary hooks on f/F/t/T so that we know when to reset Sneak.
     call s:ft_hook()
   endif
-  if a:op ==# 'g@' && get(g:, 'first_op', 0)
+  if s:opfunc_new
+    let s:opfunc_new = 0
     let s:st_opfunc = deepcopy(s:st)
   endif
 
