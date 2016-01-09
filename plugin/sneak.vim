@@ -153,7 +153,7 @@ func! sneak#to(op, input, inputlen, count, repeatmotion, reverse, inclusive, str
     "set temporary hooks on f/F/t/T so that we know when to reset Sneak.
     call s:ft_hook()
   endif
-  if s:opfunc_new
+  if s:check_opfunc && s:opfunc_new
     let s:opfunc_new = 0
     let s:st_opfunc = deepcopy(s:st)
   endif
