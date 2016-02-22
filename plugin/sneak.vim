@@ -55,12 +55,15 @@ func! sneak#state()
 endf
 
 func! sneak#is_sneaking()
-  return exists("#SneakPlugin#CursorMoved#<buffer>")
+  return exists("#SneakPlugin#CursorMoved")
 endf
 
 func! sneak#cancel()
   call sneak#hl#removehl()
   autocmd! SneakPlugin * <buffer>
+  if maparg('<esc>', 'n') =~# 'sneak#cancel' "teardown temporary <esc> mapping
+    silent! unmap <esc>
+  endif
   return ''
 endf
 
@@ -221,8 +224,8 @@ func! sneak#to(op, input, inputlen, count, repeatmotion, reverse, inclusive, str
   endif
 
   "enter streak-mode iff there are >=2 _additional_ on-screen matches.
-  let target = (2 == a:streak || (a:streak && g:sneak#opt.streak && s.hasmatches(2))) && !max(bounds)
-        \ ? sneak#streak#to(s, is_v, a:reverse): ""
+  let target = (2 == a:streak || (a:streak && g:sneak#opt.streak && (is_op || s.hasmatches(2)))) && !max(bounds)
+        \ ? sneak#streak#to(s, is_v, a:reverse) : ""
 
   if is_op || "" != target
     call sneak#hl#removehl()
@@ -238,10 +241,10 @@ endf "}}}
 func! s:attach_autocmds()
   augroup SneakPlugin
     autocmd!
-    autocmd InsertEnter,WinLeave,BufLeave <buffer> call sneak#cancel()
+    autocmd InsertEnter,WinLeave,BufLeave * call sneak#cancel()
     "_nested_ autocmd to skip the _first_ CursorMoved event.
     "NOTE: CursorMoved is _not_ triggered if there is typeahead during a macro/script...
-    autocmd CursorMoved <buffer> autocmd SneakPlugin CursorMoved <buffer> call sneak#cancel()
+    autocmd CursorMoved * autocmd SneakPlugin CursorMoved * call sneak#cancel()
   augroup END
 endf
 
