@@ -55,12 +55,12 @@ func! sneak#state()
 endf
 
 func! sneak#is_sneaking()
-  return exists("#SneakPlugin#CursorMoved")
+  return exists("#SneakPlugin#CursorMoved#<buffer>")
 endf
 
 func! sneak#cancel()
   call sneak#hl#removehl()
-  autocmd! SneakPlugin
+  autocmd! SneakPlugin * <buffer>
   if maparg('<esc>', 'n') =~# 'sneak#cancel' "teardown temporary <esc> mapping
     silent! unmap <esc>
   endif
@@ -241,10 +241,10 @@ endf "}}}
 func! s:attach_autocmds()
   augroup SneakPlugin
     autocmd!
-    autocmd InsertEnter,WinLeave,BufLeave * call sneak#cancel()
+    autocmd InsertEnter,WinLeave,BufLeave <buffer> call sneak#cancel()
     "_nested_ autocmd to skip the _first_ CursorMoved event.
     "NOTE: CursorMoved is _not_ triggered if there is typeahead during a macro/script...
-    autocmd CursorMoved * autocmd SneakPlugin CursorMoved * call sneak#cancel()
+    autocmd CursorMoved <buffer> autocmd SneakPlugin CursorMoved <buffer> call sneak#cancel()
   augroup END
 endf
 
